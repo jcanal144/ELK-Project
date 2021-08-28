@@ -1,0 +1,31 @@
+---
+
+  - name: Deploy metricbeat
+    hosts: webservers
+    become: true
+    tasks:
+
+    - name: dload mb file
+      command: curl -L -O https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-7.6.1-amd64.deb
+
+    - name: install mb file
+      command: dpkg -i metricbeat-7.6.1-amd64.deb
+
+    - name: copy config file
+      copy:
+        src: /etc/ansible/files/metricbeat-config.yml
+        dest: /etc/metricbeat/metricbeat.yml
+
+    - name: enable and config sys module
+      command: metricbeat modules enable docker
+
+    - name: setup metricbeat
+      command: metricbeat setup
+
+    - name: start mb svc
+      command: service metricbeat start
+
+    - name: enable mb svc
+      systemd:
+        name: metricbeat
+        enabled: yes
